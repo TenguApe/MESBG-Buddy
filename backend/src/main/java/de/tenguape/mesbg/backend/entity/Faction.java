@@ -17,8 +17,6 @@ public class Army {
 
     private String name;
 
-    private String faction;
-
     @ManyToMany
     private List<Hero> heroes;
 }

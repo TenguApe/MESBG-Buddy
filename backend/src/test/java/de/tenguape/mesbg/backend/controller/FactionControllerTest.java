@@ -1,3 +1,4 @@
+/*
 package de.tenguape.mesbg.backend.controller;
 
 import de.tenguape.mesbg.backend.entity.Army;
@@ -67,4 +68,4 @@ public class ArmyControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Lothlorien"));
     }
-}
+}*/

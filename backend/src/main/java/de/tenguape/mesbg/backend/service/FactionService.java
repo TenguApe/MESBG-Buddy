@@ -31,7 +31,6 @@ public class ArmyService {
         return repo.findById(id)
                 .map(army -> {
                     army.setName(updated.getName());
-                    army.setFaction(updated.getFaction());
                     army.setHeroes(updated.getHeroes());
                     return repo.save(army);
                 }).orElseThrow();
