@@ -1,33 +1,33 @@
 package de.tenguape.mesbg.backend.service;
 
-import de.tenguape.mesbg.backend.entity.Army;
-import de.tenguape.mesbg.backend.repository.ArmyRepository;
+import de.tenguape.mesbg.backend.entity.Faction;
+import de.tenguape.mesbg.backend.repository.FactionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class ArmyService {
+public class FactionService {
 
-    private final ArmyRepository repo;
+    private final FactionRepository repo;
 
-    public ArmyService(ArmyRepository repo) {
+    public FactionService(FactionRepository repo) {
         this.repo = repo;
     }
 
-    public List<Army> getAll() {
+    public List<Faction> getAll() {
         return repo.findAll();
     }
 
-    public Army getById(Long id) {
+    public Faction getById(Long id) {
         return repo.findById(id).orElseThrow();
     }
 
-    public Army create(Army army) {
-        return repo.save(army);
+    public Faction create(Faction faction) {
+        return repo.save(faction);
     }
 
-    public Army update(Long id, Army updated) {
+    public Faction update(Long id, Faction updated) {
         return repo.findById(id)
                 .map(army -> {
                     army.setName(updated.getName());

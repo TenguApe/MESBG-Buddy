@@ -1,84 +1,107 @@
-/*
 package de.tenguape.mesbg.backend.service;
 
-import de.tenguape.mesbg.backend.entity.Army;
+import de.tenguape.mesbg.backend.entity.Faction;
 import de.tenguape.mesbg.backend.entity.Hero;
-import de.tenguape.mesbg.backend.repository.ArmyRepository;
+import de.tenguape.mesbg.backend.repository.FactionRepository;
 import de.tenguape.mesbg.backend.repository.HeroRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
-public class ArmyServiceTest {
+public class FactionServiceTest {
 
     @Autowired
-    private ArmyService armyService;
+    private FactionService factionService;
 
     @Autowired
-    private ArmyRepository armyRepo;
+    private FactionRepository factionRepo;
 
     @Autowired
     private HeroRepository heroRepo;
 
     @BeforeEach
     void setup() {
-        armyRepo.deleteAll();
         heroRepo.deleteAll();
+        factionRepo.deleteAll();
     }
 
     @Test
-    void testCreateArmyWithHeroes() {
-        Hero hero1 = heroRepo.save(Hero.builder().name("Aragorn").faction("Gondor").mightPointsMax(3).willPointsMax(3).fatePointsMax(3).build());
-        Hero hero2 = heroRepo.save(Hero.builder().name("Gimli").faction("Dwarves").mightPointsMax(2).willPointsMax(1).fatePointsMax(2).build());
+    void testCreateFactionWithHeroes() {
+        Faction fellowship = factionRepo.save(Faction.builder().name("Fellowship").build());
 
-        Army army = Army.builder()
-                .name("Fellowship")
-                .heroes(List.of(hero1, hero2))
-                .build();
+        Hero hero1 = heroRepo.save(Hero.builder()
+                .name("Aragorn")
+                .faction(fellowship)
+                .mightPointsMax(3).mightPointsCurrent(3)
+                .willPointsMax(3).willPointsCurrent(3)
+                .fatePointsMax(3).fatePointsCurrent(3)
+                .build());
 
-        Army created = armyService.create(army);
+        Hero hero2 = heroRepo.save(Hero.builder()
+                .name("Gimli")
+                .faction(fellowship)
+                .mightPointsMax(2).mightPointsCurrent(2)
+                .willPointsMax(1).willPointsCurrent(1)
+                .fatePointsMax(2).fatePointsCurrent(2)
+                .build());
+
+        fellowship.setHeroes(List.of(hero1, hero2));
+        Faction created = factionService.update(fellowship.getId(), fellowship);
 
         assertEquals("Fellowship", created.getName());
         assertEquals(2, created.getHeroes().size());
     }
 
     @Test
-    void testUpdateArmyNameAndHeroes() {
-        Hero hero1 = heroRepo.save(Hero.builder().name("Frodo").faction("Shire").mightPointsMax(1).willPointsMax(6).fatePointsMax(3).build());
-        Army army = armyService.create(Army.builder().name("Shire").build());
+    void testUpdateFactionNameAndHeroes() {
+        Faction shire = factionRepo.save(Faction.builder().name("Shire").build());
 
-        Hero hero2 = heroRepo.save(Hero.builder().name("Sam").faction("Shire").mightPointsMax(2).willPointsMax(3).fatePointsMax(2).build());
+        Hero hero1 = heroRepo.save(Hero.builder()
+                .name("Frodo")
+                .faction(shire)
+                .mightPointsMax(1).mightPointsCurrent(1)
+                .willPointsMax(6).willPointsCurrent(6)
+                .fatePointsMax(3).fatePointsCurrent(3)
+                .build());
 
-        Army updated = Army.builder()
+        Hero hero2 = heroRepo.save(Hero.builder()
+                .name("Sam")
+                .faction(shire)
+                .mightPointsMax(2).mightPointsCurrent(2)
+                .willPointsMax(3).willPointsCurrent(3)
+                .fatePointsMax(2).fatePointsCurrent(2)
+                .build());
+
+        Faction updated = Faction.builder()
                 .name("Hobbit Army")
                 .heroes(List.of(hero1, hero2))
                 .build();
 
-        Army result = armyService.update(army.getId(), updated);
+        Faction result = factionService.update(shire.getId(), updated);
 
         assertEquals("Hobbit Army", result.getName());
         assertEquals(2, result.getHeroes().size());
     }
 
     @Test
-    void testDeleteArmy() {
-        Army army = armyService.create(Army.builder().name("Elves").build());
-        armyService.delete(army.getId());
-        assertTrue(armyRepo.findById(army.getId()).isEmpty());
+    void testDeleteFaction() {
+        Faction faction = factionService.create(Faction.builder().name("Elves").build());
+        factionService.delete(faction.getId());
+        assertTrue(factionRepo.findById(faction.getId()).isEmpty());
     }
 
     @Test
-    void testGetAllArmies() {
-        armyService.create(Army.builder().name("A").build());
-        armyService.create(Army.builder().name("B").build());
+    void testGetAllFactions() {
+        factionService.create(Faction.builder().name("A").build());
+        factionService.create(Faction.builder().name("B").build());
 
-        List<Army> armies = armyService.getAll();
-        assertEquals(2, armies.size());
+        List<Faction> factions = factionService.getAll();
+        assertEquals(2, factions.size());
     }
-}*/
+}

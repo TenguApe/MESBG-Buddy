@@ -1,38 +1,38 @@
 package de.tenguape.mesbg.backend.controller;
 
-import de.tenguape.mesbg.backend.entity.Army;
-import de.tenguape.mesbg.backend.service.ArmyService;
+import de.tenguape.mesbg.backend.entity.Faction;
+import de.tenguape.mesbg.backend.service.FactionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/armies")
-public class ArmyController {
+@RequestMapping("/api/factions")
+public class FactionController {
 
-    private final ArmyService service;
+    private final FactionService service;
 
-    public ArmyController(ArmyService service) {
+    public FactionController(FactionService service) {
         this.service = service;
     }
 
     @GetMapping
-    public List<Army> getAll() {
+    public List<Faction> getAll() {
         return service.getAll();
     }
 
     @GetMapping("/{id}")
-    public Army getById(@PathVariable Long id) {
+    public Faction getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
     @PostMapping
-    public Army create(@RequestBody Army army) {
-        return service.create(army);
+    public Faction create(@RequestBody Faction faction) {
+        return service.create(faction);
     }
 
     @PutMapping("/{id}")
-    public Army update(@PathVariable Long id, @RequestBody Army updated) {
+    public Faction update(@PathVariable Long id, @RequestBody Faction updated) {
         return service.update(id, updated);
     }
 

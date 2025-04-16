@@ -1,17 +1,19 @@
 package de.tenguape.mesbg.backend.service;
 
+import de.tenguape.mesbg.backend.entity.Faction;
 import de.tenguape.mesbg.backend.entity.Hero;
 import de.tenguape.mesbg.backend.model.OperationType;
 import de.tenguape.mesbg.backend.model.PointType;
+import de.tenguape.mesbg.backend.repository.FactionRepository;
 import de.tenguape.mesbg.backend.repository.HeroRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class HeroServiceTest {
@@ -22,16 +24,23 @@ public class HeroServiceTest {
     @Autowired
     private HeroRepository repo;
 
+    @Autowired
+    private FactionRepository factionRepo;
+
+    private Faction faction;
+
     @BeforeEach
     void setup() {
         repo.deleteAll();
+        factionRepo.deleteAll();
+        faction = factionRepo.save(Faction.builder().name("Default Faction").build());
     }
 
     @Test
     void testCreateSetsCurrentPointsToMaxIfZero() {
         Hero hero = Hero.builder()
                 .name("Gimli")
-                .faction("Dwarves")
+                .faction(faction)
                 .mightPointsMax(3)
                 .willPointsMax(1)
                 .fatePointsMax(2)
@@ -48,13 +57,10 @@ public class HeroServiceTest {
     void testCreateKeepsProvidedCurrentPoints() {
         Hero hero = Hero.builder()
                 .name("Legolas")
-                .faction("Elves")
-                .mightPointsMax(3)
-                .mightPointsCurrent(2)
-                .willPointsMax(3)
-                .willPointsCurrent(1)
-                .fatePointsMax(3)
-                .fatePointsCurrent(3)
+                .faction(faction)
+                .mightPointsMax(3).mightPointsCurrent(2)
+                .willPointsMax(3).willPointsCurrent(1)
+                .fatePointsMax(3).fatePointsCurrent(3)
                 .build();
 
         Hero created = service.create(hero);
@@ -68,21 +74,20 @@ public class HeroServiceTest {
     void testUpdateChangesFields() {
         Hero hero = service.create(Hero.builder()
                 .name("Frodo")
-                .faction("Shire")
+                .faction(faction)
                 .mightPointsMax(1)
                 .willPointsMax(6)
                 .fatePointsMax(3)
                 .build());
 
+        Faction updatedFaction = factionRepo.save(Faction.builder().name("Fellowship").build());
+
         Hero updated = Hero.builder()
                 .name("Frodo Baggins")
-                .faction("Fellowship")
-                .mightPointsMax(2)
-                .mightPointsCurrent(1)
-                .willPointsMax(5)
-                .willPointsCurrent(3)
-                .fatePointsMax(2)
-                .fatePointsCurrent(2)
+                .faction(updatedFaction)
+                .mightPointsMax(2).mightPointsCurrent(1)
+                .willPointsMax(5).willPointsCurrent(3)
+                .fatePointsMax(2).fatePointsCurrent(2)
                 .specialRules("Ringbearer")
                 .build();
 
@@ -91,13 +96,14 @@ public class HeroServiceTest {
         assertEquals("Frodo Baggins", result.getName());
         assertEquals(1, result.getMightPointsCurrent());
         assertEquals("Ringbearer", result.getSpecialRules());
+        assertEquals("Fellowship", result.getFaction().getName());
     }
 
     @Test
     void testDeleteHero() {
         Hero hero = service.create(Hero.builder()
                 .name("Boromir")
-                .faction("Gondor")
+                .faction(faction)
                 .mightPointsMax(3)
                 .willPointsMax(3)
                 .fatePointsMax(3)
@@ -110,8 +116,8 @@ public class HeroServiceTest {
 
     @Test
     void testGetAllReturnsList() {
-        service.create(Hero.builder().name("A").faction("X").mightPointsMax(1).willPointsMax(1).fatePointsMax(1).build());
-        service.create(Hero.builder().name("B").faction("Y").mightPointsMax(2).willPointsMax(2).fatePointsMax(2).build());
+        service.create(Hero.builder().name("A").faction(faction).mightPointsMax(1).willPointsMax(1).fatePointsMax(1).build());
+        service.create(Hero.builder().name("B").faction(faction).mightPointsMax(2).willPointsMax(2).fatePointsMax(2).build());
 
         List<Hero> heroes = service.getAll();
         assertEquals(2, heroes.size());
@@ -121,7 +127,7 @@ public class HeroServiceTest {
     void testAdjustPoints_decrementFate() {
         Hero gandalf = repo.save(Hero.builder()
                 .name("Gandalf")
-                .faction("Istari")
+                .faction(faction)
                 .mightPointsMax(3).mightPointsCurrent(3)
                 .willPointsMax(6).willPointsCurrent(6)
                 .fatePointsMax(3).fatePointsCurrent(3)
@@ -134,24 +140,22 @@ public class HeroServiceTest {
         );
 
         assertEquals(2, updated.getFatePointsCurrent());
-        assertEquals(3, updated.getFatePointsMax()); // Max bleibt gleich
-        assertEquals(6, updated.getWillPointsCurrent()); // Andere Werte bleiben unberührt
+        assertEquals(3, updated.getFatePointsMax());
+        assertEquals(6, updated.getWillPointsCurrent());
     }
 
     @Test
     void testAdjustPoints_doesNotGoBelowZero() {
         Hero hero = repo.save(Hero.builder()
                 .name("Test")
-                .mightPointsMax(1)
-                .mightPointsCurrent(0)
-                .willPointsMax(1)
-                .willPointsCurrent(1)
-                .fatePointsMax(1)
-                .fatePointsCurrent(1)
+                .faction(faction)
+                .mightPointsMax(1).mightPointsCurrent(0)
+                .willPointsMax(1).willPointsCurrent(1)
+                .fatePointsMax(1).fatePointsCurrent(1)
                 .build());
 
         Hero result = service.adjustPoints(hero.getId(), PointType.MIGHT, OperationType.DECREMENT);
 
-        assertEquals(0, result.getMightPointsCurrent()); // bleibt 0, nicht negativ
+        assertEquals(0, result.getMightPointsCurrent());
     }
 }

@@ -14,7 +14,10 @@ public class Hero {
     private Long id;
 
     private String name;
-    private String faction;
+
+    @ManyToOne
+    @JoinColumn(name = "faction_id")
+    private Faction faction;
 
     private int mightPointsMax;
     private int mightPointsCurrent;

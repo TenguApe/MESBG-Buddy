@@ -1,11 +1,13 @@
 package de.tenguape.mesbg.backend.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.tenguape.mesbg.backend.entity.Faction;
 import de.tenguape.mesbg.backend.entity.Hero;
 import de.tenguape.mesbg.backend.model.OperationType;
-import de.tenguape.mesbg.backend.model.PointType;
 import de.tenguape.mesbg.backend.model.PointAdjustmentRequest;
+import de.tenguape.mesbg.backend.model.PointType;
+import de.tenguape.mesbg.backend.repository.FactionRepository;
 import de.tenguape.mesbg.backend.repository.HeroRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -30,18 +31,24 @@ public class HeroControllerTest {
     private HeroRepository heroRepository;
 
     @Autowired
+    private FactionRepository factionRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setup() {
         heroRepository.deleteAll();
+        factionRepository.deleteAll();
     }
 
     @Test
     void testCreateAndGetHero() throws Exception {
+        Faction faction = factionRepository.save(Faction.builder().name("Gondor").build());
+
         Hero hero = Hero.builder()
                 .name("Aragorn")
-                .faction("Gondor")
+                .faction(faction)
                 .mightPointsMax(3).mightPointsCurrent(3)
                 .willPointsMax(2).willPointsCurrent(2)
                 .fatePointsMax(2).fatePointsCurrent(2)
@@ -60,9 +67,11 @@ public class HeroControllerTest {
 
     @Test
     void testAdjustPoints() throws Exception {
+        Faction faction = factionRepository.save(Faction.builder().name("Istari").build());
+
         Hero hero = heroRepository.save(Hero.builder()
                 .name("Gandalf")
-                .faction("Istari")
+                .faction(faction)
                 .mightPointsMax(3).mightPointsCurrent(3)
                 .willPointsMax(6).willPointsCurrent(6)
                 .fatePointsMax(3).fatePointsCurrent(3)
